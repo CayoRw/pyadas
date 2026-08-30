@@ -7,10 +7,11 @@ name = "pyadas"
 version = "0.1.0"
 description = "Open-Source Driver Monitoring System"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.9, <3.12"
 dependencies = [
     "opencv-python",
-    "mediapipe",
+    "mediapipe==0.10.14",
     "PySide6",
-    "numpy"
+    "numpy",
+    "scipy"
 ]
