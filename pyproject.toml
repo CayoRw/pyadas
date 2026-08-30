@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyadas"
+version = "0.1.0"
+description = "Open-Source Driver Monitoring System"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "opencv-python",
+    "mediapipe",
+    "PySide6",
+    "numpy"
+]
