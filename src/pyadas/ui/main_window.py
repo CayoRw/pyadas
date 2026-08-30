@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                                QCheckBox, QFileDialog)
 import os
 
+from PySide6.QtMultimedia import QMediaDevices
 class VideoAcquisitionThread(QThread):
     frame_ready = Signal(QImage)
     telemetry_ready = Signal(dict)
@@ -140,7 +141,16 @@ class MainWindow(QMainWindow):
         control_layout = QHBoxLayout()
         
         self.combo_camera = QComboBox()
-        self.combo_camera.addItems(["Câmera 0", "Câmera 1", "Câmera 2", "Câmera 3"])
+
+        # NEW: Varredura dinâmica de câmeras conectadas
+        available_cameras = QMediaDevices.videoInputs()
+        if not available_cameras:
+            self.combo_camera.addItem("Nenhuma câmera detectada", 0)
+        else:
+            for idx, cam in enumerate(available_cameras):
+                # cam.description() pega o nome real da câmera no Windows
+                self.combo_camera.addItem(f"{cam.description()} (ID {idx})", idx)
+                
         self.combo_camera.setMinimumHeight(45)
         self.combo_camera.setStyleSheet("font-size: 14px;")
         
@@ -226,7 +236,8 @@ class MainWindow(QMainWindow):
 
     def toggle_monitoring(self):
         if self.video_thread is None or not self.video_thread.isRunning():
-            cam_idx = self.combo_camera.currentIndex()
+            # NEW: Pega o ID (userdata) correspondente à câmera selecionada
+            cam_idx = self.combo_camera.currentData()
             
             self.video_thread = VideoAcquisitionThread(camera_index=cam_idx)
             
