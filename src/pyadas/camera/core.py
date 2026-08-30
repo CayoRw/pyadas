@@ -3,8 +3,10 @@ import time
 import mediapipe as mp
 from pyadas.perception.ear import get_ear_metrics
 from pyadas.perception.mar import get_mar_metric
-# NEW: Import the Head Pose module
 from pyadas.perception.head_pose import get_head_pose
+from pyadas.drowsiness.temporal import TemporalAnalyzer
+# NEW: Importar o Estimador de Estado
+from pyadas.driver_state.state_estimator import DriverStateEstimator
 
 def test_camera_feed():
     cap = cv2.VideoCapture(0)
@@ -20,6 +22,10 @@ def test_camera_feed():
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5
     )
+    
+    analyzer = TemporalAnalyzer(calibration_frames=100, perclos_window_frames=150)
+    # NEW: Instanciar o estimador de estado
+    state_estimator = DriverStateEstimator()
     
     while cap.isOpened():
         success, frame = cap.read()
@@ -43,23 +49,31 @@ def test_camera_feed():
                     connection_drawing_spec=mp_drawing_styles.get_default_face_mesh_tesselation_style()
                 )
                 
-                # Metrics Calculation
                 ear_left, ear_right, ear_avg = get_ear_metrics(face_landmarks, w_frame, h_frame)
                 mar = get_mar_metric(face_landmarks, w_frame, h_frame)
-                
-                # NEW: Calculate Head Pose (Yaw, Pitch, Roll)
                 yaw, pitch, roll = get_head_pose(face_landmarks, w_frame, h_frame)
                 
-                # Telemetry Display - EAR and MAR
-                cv2.putText(frame, f'EAR L: {ear_left:.2f}', (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
-                cv2.putText(frame, f'EAR R: {ear_right:.2f}', (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
-                cv2.putText(frame, f'EAR Avg: {ear_avg:.2f}', (20, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-                cv2.putText(frame, f'MAR: {mar:.2f}', (20, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 165, 255), 2)
+                analyzer.update(ear_avg, mar)
+                perclos = analyzer.get_perclos()
+                is_calibrated = analyzer.is_calibrated
+                calib_status = analyzer.get_calibration_status()
                 
-                # NEW: Telemetry Display - Head Pose
+                # NEW: Calcular o estado final do motorista
+                current_state = state_estimator.estimate_state(is_calibrated, perclos, mar, yaw)
+                
+                # Display Metrics
+                cv2.putText(frame, f'EAR Avg: {ear_avg:.2f}', (20, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                cv2.putText(frame, f'MAR: {mar:.2f}', (20, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 165, 255), 2)
                 cv2.putText(frame, f'Yaw: {yaw:.1f}', (1000, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
-                cv2.putText(frame, f'Pitch: {pitch:.1f}', (1000, 130), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
-                cv2.putText(frame, f'Roll: {roll:.1f}', (1000, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+                
+                # Display State and Temporal
+                if is_calibrated:
+                    # NEW: Exibir o estado com destaque
+                    cv2.putText(frame, f'STATE: {current_state}', (20, 170), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
+                    cv2.putText(frame, f'PERCLOS: {perclos*100:.1f}%', (20, 210), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                else:
+                    cv2.putText(frame, f'Calibrating... {int(calib_status*100)}%', (20, 170), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
+                    cv2.putText(frame, f'STATE: {current_state}', (20, 210), cv2.FONT_HERSHEY_SIMPLEX, 1, (128, 128, 128), 2)
         
         c_time = time.time()
         fps = 1 / (c_time - p_time) if (c_time - p_time) > 0 else 0
