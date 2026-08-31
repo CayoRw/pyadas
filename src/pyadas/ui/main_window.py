@@ -290,7 +290,9 @@ class MainWindow(QMainWindow):
             self.lbl_calib.setStyleSheet("color: orange; font-weight: bold;")
             
         state = data['state']
-        self.lbl_state.setText(f"STATE:\n{state}")
+
+        state_display = state.replace("_", " ") 
+        self.lbl_state.setText(f"STATE:\n{state_display}")
         
         if state == "ALERT":
             self.lbl_state.setStyleSheet("color: green;")
