@@ -1,4 +1,6 @@
-# pyadas 🚘📹
+<p align="center">
+  <img src="assets/icon.png" width="200" alt="pyadas logo">
+</p>
 
 [![PyPI version](https://img.shields.io/pypi/v/pyadas.svg)](https://pypi.org/project/pyadas/)
 [![Python versions](https://img.shields.io/pypi/pyversions/pyadas.svg)](https://pypi.org/project/pyadas/)

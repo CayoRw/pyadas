@@ -22,6 +22,8 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
 import os
 
 from PySide6.QtMultimedia import QMediaDevices
+
+from PySide6.QtGui import QIcon
 class VideoAcquisitionThread(QThread):
     frame_ready = Signal(QImage)
     telemetry_ready = Signal(dict)
@@ -29,6 +31,7 @@ class VideoAcquisitionThread(QThread):
     # NEW: O inicializador agora aceita o índice da câmera
     def __init__(self, camera_index=0):
         super().__init__()
+
         self.running = False
         self.camera_index = camera_index
         
@@ -121,7 +124,14 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("pyadas - Driver Monitoring System")
         self.resize(1200, 700)
+
+        # Descobre a pasta atual (onde está o main_window.py)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # Monta o caminho absoluto voltando as pastas até chegar em assets
+        icon_path = os.path.join(current_dir, "..", "..", "..", "assets", "icon.png")
         
+        self.setWindowIcon(QIcon(icon_path))
+
         self.log_directory = "data" # Diretório padrão
         self.setup_ui()
         self.video_thread = None
