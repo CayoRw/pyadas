@@ -6,41 +6,45 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/pyadas.svg)](https://pypi.org/project/pyadas/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**pyadas** is a real-time Driver Monitoring System (DMS) tailored for Advanced Driver Assistance Systems (ADAS) applications.
+# pyADAS
 
-Built purely in Python, the project leverages asynchronous processing (via PySide6), computer vision, and facial geometry (via MediaPipe and OpenCV) to estimate attention, distraction, and fatigue states in real time using conventional hardware (webcams).
+### Open-Source Driver Monitoring System for ADAS Applications
 
-> **Important Notice:** This is a software engineering and research prototype. It is **not** a diagnostic medical device and holds **no** certifications to act as a production vehicular safety system.
+**pyADAS** is a real-time Driver Monitoring System (DMS) designed to explore computer vision-based driver state estimation for Advanced Driver Assistance Systems (ADAS).
+
+Built purely in Python, the project leverages a multithreaded real-time processing architecture, a PySide6 graphical interface, and computer vision, and facial geometry (via MediaPipe and OpenCV) to estimate attention, distraction, and fatigue states in real time using conventional hardware (webcams).
+
+> **Important Notice:** This project is a software engineering and research prototype. It is **not** a medical diagnostic device and is not certified or intended to function as a production automotive safety system.
 
 ---
 
-## 📋 Table of Contents
-1. [Key Features](#-key-features)
-2. [Driver State Estimator](#%EF%B8%8F-driver-state-estimator)
-3. [Installation](#-installation)
-4. [Usage](#-usage)
-5. [Contact](#-contact)
+<p align="center">
+  <img src="assets/demo.gif" alt="pyadas demo" width="800">
+</p>
 
 ---
 
 ## 🚀 Key Features
 
-*   **Dynamic Calibration (Auto-Baseline):** The system relies on no universal hardcoded thresholds. It autonomously calibrates the driver's facial averages within the first few seconds of initialization.
-*   **Fatigue Estimation:** Continuous calculation of the Eye Aspect Ratio (EAR).
-*   **Temporal Analysis (PERCLOS):** Implementation of the Percentage of Eye Closure metric via a high-performance sliding window for robust drowsiness and potential microsleep detection, bypassing normal blinking false positives.
-*   **Yawn Detection:** Mouth Aspect Ratio (MAR) calculation.
-*   **Gaze & Pose Estimation:** Approximate calculation of the head's Yaw, Pitch, and Roll angles.
-*   **Asynchronous & Responsive UI:** Multi-threaded architecture isolating heavy video acquisition from the graphical user interface built with PySide6.
-*   **Telemetry (Black-box logger):** Continuous CSV log recording (EAR, MAR, PERCLOS, FPS, Angles, Driver State) for post-processing and mathematical data cross-referencing.
+- **Dynamic Calibration:** Automatic baseline calibration during system initialization.
+- **Eye Activity Analysis:** Continuous EAR calculation for eye-closure analysis.
+- **PERCLOS:** Sliding-window temporal analysis for drowsiness and potential microsleep detection.
+- **Yawning Detection:** MAR-based mouth opening analysis.
+- **Head Pose Estimation:** Approximate Yaw, Pitch, and Roll estimation.
+- **Driver Distraction Detection:** Identification of prolonged head/gaze deviation from the forward region.
+- **Real-Time Processing:** Multithreaded video-processing pipeline with a responsive PySide6 interface.
+- **Telemetry:** Continuous CSV black-box logging of perception metrics and driver-state information.
 
-## ⚙️ Driver State Estimator
+## 🧠 Driver State Estimator
 
-The package architecture cross-references geometric and temporal metrics to classify the driver into critical categories:
-*   `ALERT`: Normal active visual state.
-*   `DISTRACTED`: Prolonged head rotation outside the region of interest.
-*   `YAWNING`: Temporal events of severe mouth opening (MAR > threshold).
-*   `DROWSY`: Drowsiness indicator triggered when PERCLOS exceeds primary safety levels.
-*   `POTENTIAL_MICROSLEEP`: Detection of severe, sustained eye closure over the temporal window.
+The system combines geometric and temporal measurements to estimate
+the driver's current state.
+
+- `ALERT` — Normal visual/attention state.
+- `DISTRACTED` — Prolonged deviation from the forward attention region.
+- `YAWNING` — Sustained mouth opening detected through MAR analysis.
+- `DROWSY` — Drowsiness indicator based on temporal eye-closure analysis.
+- `POTENTIAL_MICROSLEEP` — Prolonged eye closure detected through temporal analysis.
 
 ## 💻 Installation
 
@@ -57,6 +61,18 @@ from pyadas.pyadas_global import pyadasGui
 
 pyadasGui()
 ```
+
+## 🧰 Technologies
+
+- Python
+- OpenCV
+- MediaPipe
+- PySide6 / Qt
+- NumPy
+- Pandas
+- Git
+- Computer Vision
+- GUI Development
 
 ## ✉️ Contact
 
